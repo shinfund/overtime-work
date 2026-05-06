@@ -487,7 +487,7 @@ async function loadData(){
     };
 
     // Cloudflare Worker 프록시 호출
-    const res = await fetch(`${CFG.workerUrl}/notion/databases/${CFG.dbId}/query`, {
+    const res = await fetch(`${CFG.workerUrl}/v1/databases/${CFG.dbId}/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -504,7 +504,7 @@ async function loadData(){
     // 페이지네이션 처리
     let cursor = data.next_cursor;
     while(cursor && data.has_more){
-      const r2 = await fetch(`${CFG.workerUrl}/notion/databases/${CFG.dbId}/query`,{
+      const r2 = await fetch(`${CFG.workerUrl}/v1/databases/${CFG.dbId}/query`,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({...body, start_cursor: cursor})
