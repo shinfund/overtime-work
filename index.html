@@ -1124,10 +1124,11 @@ ALL_RECORDS = DEMO_DATA;
 updateMonthLabel();
 renderAll();
 
+// 설정값이 있으면 페이지 로드 시 자동 새로고침
 (()=>{
-  const lu = document.getElementById('lastUpdate');
-
-
+  if(CFG.workerUrl && CFG.dbId){
+    loadData();
+  }
 })();
 </script>
 </body>
