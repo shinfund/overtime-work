@@ -167,12 +167,13 @@ tr:hover td{background:var(--sky50)}
       </div>
       <div class="modal-field">
         <label class="modal-label">Cloudflare Worker URL</label>
-        <input id="cfgWorkerUrl" class="modal-input" type="url" placeholder="https://your-worker.workers.dev"/>
-        <div class="modal-hint">Notion API 프록시 Worker 엔드포인트</div>
+        <input id="cfgWorkerUrl" class="modal-input" type="text" placeholder="https://your-worker.workers.dev"/>
+        <div class="modal-hint">저장된 값은 XX로 마스킹 표시 · 변경 시에만 새로 입력하세요</div>
       </div>
       <div class="modal-field">
         <label class="modal-label">노션 DB ID</label>
         <input id="cfgDbId" class="modal-input" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"/>
+        <div class="modal-hint">저장된 값은 XX로 마스킹 표시 · 변경 시에만 새로 입력하세요</div>
       </div>
       <div class="modal-btns">
         <button class="modal-cancel" onclick="closeCfgModal()">취소</button>
@@ -371,9 +372,39 @@ function fmtH(h){ const n=parseFloat(h)||0; return n%1===0?String(n):n.toFixed(1
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ── 모달 ──────────────────────────────────────────────
+function maskVal(v){
+  if(!v) return '';
+  // https://xxxx.workers.dev 형태 → https://XX...XX.workers.dev
+  // DB ID 형태 → XXXX-XXXX-...-XXXX (앞 4자리·뒤 4자리만 표시)
+  if(v.startsWith('http')){
+    try{
+      const u=new URL(v);
+      const h=u.hostname; // xxxx.workers.dev
+      const parts=h.split('.');
+      const masked=parts[0].length>4
+        ? parts[0].slice(0,2)+'XX'+parts[0].slice(-2)+'.'+parts.slice(1).join('.')
+        : 'XX.'+parts.slice(1).join('.');
+      return u.protocol+'//'+masked;
+    }catch(e){
+      return v.slice(0,6)+'XX...XX'+v.slice(-4);
+    }
+  }
+  // UUID 형태 (DB ID)
+  if(/^[0-9a-f\-]{32,36}$/i.test(v)){
+    const clean=v.replace(/-/g,'');
+    return clean.slice(0,4)+'-XXXX-XXXX-XXXX-'+clean.slice(-4);
+  }
+  return v.slice(0,3)+'XX...XX'+v.slice(-3);
+}
 function openCfgModal(){
-  document.getElementById('cfgWorkerUrl').value=CFG.workerUrl;
-  document.getElementById('cfgDbId').value=CFG.dbId;
+  const wu=CFG.workerUrl, db=CFG.dbId;
+  const wEl=document.getElementById('cfgWorkerUrl');
+  const dEl=document.getElementById('cfgDbId');
+  // 저장된 값이 있으면 마스킹 표시 + placeholder로 안내
+  if(wu){ wEl.value=''; wEl.placeholder=maskVal(wu); wEl.dataset.saved='1'; }
+  else   { wEl.value=''; wEl.placeholder='https://your-worker.workers.dev'; delete wEl.dataset.saved; }
+  if(db){ dEl.value=''; dEl.placeholder=maskVal(db); dEl.dataset.saved='1'; }
+  else   { dEl.value=''; dEl.placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'; delete dEl.dataset.saved; }
   document.getElementById('cfgModal').classList.add('modal-open');
   document.body.style.overflow='hidden';
 }
@@ -387,8 +418,13 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape') closeCfgModal();
 });
 function saveCfg(){
-  CFG.workerUrl=document.getElementById('cfgWorkerUrl').value.trim();
-  CFG.dbId=document.getElementById('cfgDbId').value.trim();
+  const wEl=document.getElementById('cfgWorkerUrl');
+  const dEl=document.getElementById('cfgDbId');
+  // 입력값이 있으면 새 값으로, 없으면 기존 저장값 유지
+  const newWu=wEl.value.trim();
+  const newDb=dEl.value.trim();
+  if(newWu) CFG.workerUrl=newWu;
+  if(newDb) CFG.dbId=newDb;
   try{
     localStorage.setItem('ot_workerUrl',CFG.workerUrl);
     localStorage.setItem('ot_dbId',CFG.dbId);
