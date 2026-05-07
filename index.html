@@ -496,7 +496,7 @@ let ALL_RECORDS=[];
 // ── parseNotionPage ───────────────────────────────────
 // Notion 속성명 키워드 (DB 속성명이 달라질 경우 여기서 수정)
 const PROP_KEYS = {
-  employee: ['직원','성명','이름','name'],
+  employee: ['성명','이름','직원','name','employee'],
   hours:    ['시간','hour','연장','overtime'],
   type:     ['근무명','근무','type'],
   pay:      ['지급','pay','금액','amount']
@@ -580,14 +580,14 @@ async function loadData(){
     const endDate=new Date(curYear,curMonth,0).toISOString().slice(0,10);
     const sixAgo=new Date(curYear,curMonth-13,1).toISOString().slice(0,10);
 
-    // 첫 페이지 100건으로 날짜 속성명 자동 감지
+    // 첫 페이지 1건으로 날짜 속성명 자동 감지
     const probeData=await fetchNotion(CFG.workerUrl, CFG.dbId, {
-      database_id:CFG.dbId, page_size:1
+      page_size:1
     });
     const dateProp=detectDatePropName(probeData.results||[]);
 
     const body={
-      database_id:CFG.dbId,page_size:100,
+      page_size:100,
       filter:{and:[
         {property:dateProp,date:{on_or_after:sixAgo}},
         {property:dateProp,date:{on_or_before:endDate}}
