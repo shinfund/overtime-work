@@ -546,6 +546,17 @@ function parseNotionPage(page){
 }
 
 // fetch 1회 요청 헬퍼 (중복 제거)
+function detectDatePropName(pages){
+  if(!pages||!pages.length) return 'date';
+  const props=pages[0].properties||{};
+  for(const [k,v] of Object.entries(props)){
+    if(v.type==='date') return k;
+  }
+  for(const [k,v] of Object.entries(props)){
+    if(v.type==='created_time') return k;
+  }
+  return 'date';
+}
 async function fetchNotion(workerUrl, dbId, body){
   const res=await fetch(`${workerUrl}/v1/databases/${dbId}/query`,{
     method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)
@@ -569,22 +580,11 @@ async function loadData(){
     const endDate=new Date(curYear,curMonth,0).toISOString().slice(0,10);
     const sixAgo=new Date(curYear,curMonth-13,1).toISOString().slice(0,10);
 
-    // 첫 페이지 로드 후 날짜 속성명 자동 감지
-    // DB 메타데이터에서 날짜 속성명 감지 (불필요한 데이터 요청 없이 1회 왕복)
-    const metaRes=await fetch(`${CFG.workerUrl}/v1/databases/${CFG.dbId}`,{
-      method:'GET',headers:{'Content-Type':'application/json'}
+    // 첫 페이지 100건으로 날짜 속성명 자동 감지
+    const probeData=await fetchNotion(CFG.workerUrl, CFG.dbId, {
+      database_id:CFG.dbId, page_size:1
     });
-    let dateProp='date';
-    if(metaRes.ok){
-      const meta=await metaRes.json();
-      const props=meta.properties||{};
-      const dateEntry=Object.entries(props).find(([,v])=>v.type==='date');
-      if(dateEntry) dateProp=dateEntry[0];
-      else{
-        const ctEntry=Object.entries(props).find(([,v])=>v.type==='created_time');
-        if(ctEntry) dateProp=ctEntry[0];
-      }
-    }
+    const dateProp=detectDatePropName(probeData.results||[]);
 
     const body={
       database_id:CFG.dbId,page_size:100,
@@ -611,7 +611,14 @@ async function loadData(){
              +now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
     if(lu){lu.textContent='마지막 업데이트: '+ts;lu.style.color='rgba(255,255,255,.75)';}
   }catch(e){
-    if(lu){lu.textContent='⚠ '+e.message;lu.style.color='rgba(255,150,130,.9)';}
+    // 에러 시 내장 데이터로 복귀
+    if(!ALL_RECORDS.length){ ALL_RECORDS=DEMO_DATA; renderAll(); }
+    let msg='⚠ '+e.message;
+    if(e.message.includes('400')) msg='⚠ HTTP 400 — Worker URL 또는 DB ID를 확인하세요';
+    else if(e.message.includes('401')||e.message.includes('403')) msg='⚠ 인증 오류 — Notion API 키를 확인하세요';
+    else if(e.message.includes('404')) msg='⚠ DB를 찾을 수 없습니다 — DB ID를 확인하세요';
+    else if(e.message.includes('Failed to fetch')) msg='⚠ 네트워크 오류 — Worker URL을 확인하세요';
+    if(lu){lu.textContent=msg;lu.style.color='rgba(255,150,130,.9)';}
   }finally{
     btn.disabled=false;
     btn.setAttribute('aria-busy','false');
