@@ -737,7 +737,7 @@ function buildEmpDetailRow(r){
     <td style="white-space:nowrap"><span class="type-badge type-${typeSlug(r.type||'기타')}">${esc(r.type||'—')}</span></td>
     <td class="r" style="white-space:nowrap;color:var(--sky600)">${fmtH(r.hours)}h</td>
     <td class="r" style="white-space:nowrap" class="pay-cell">${fmtWon(getPayAmt(r))}</td>
-    <td style="font-size:13px;color:var(--txt2);max-width:120px;word-break:break-all;white-space:pre-wrap">${esc(r.note||'')}</td>
+    <td style="font-size:13px;color:var(--txt2);white-space:nowrap">${esc(r.note||'')}</td>
   </tr>`;
 }
 
@@ -1011,7 +1011,7 @@ function renderDetail(recs){
         <td style="white-space:nowrap"><span class="type-badge type-${typeSlug(r.type||'기타')}">${esc(r.type||'—')}</span></td>
         <td class="r" style="white-space:nowrap;color:var(--sky600)">${fmtH(r.hours)}h</td>
         <td class="r pay-cell" style="white-space:nowrap">${fmtWon(getPayAmt(r))}</td>
-        <td style="font-size:13px;color:var(--txt2);max-width:120px;word-break:break-all;white-space:pre-wrap">${esc(r.note||'')}</td>
+        <td style="font-size:13px;color:var(--txt2);white-space:nowrap">${esc(r.note||'')}</td>
       </tr>`).join('')
     :`<tr><td colspan="6">${emptyState('조건에 맞는 내역이 없습니다.','🔍')}</td></tr>`;
 }
