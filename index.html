@@ -337,8 +337,8 @@ tr:hover td{background:var(--sky50)}
       <div class="tbl-wrap">
         <table>
           <thead><tr>
-            <th>날짜</th><th>직원명</th><th>근무형태</th>
-            <th class="r">시간</th><th class="r">지급액</th>
+            <th style="white-space:nowrap;width:1%">날짜</th><th style="white-space:nowrap;width:1%">직원명</th><th style="white-space:nowrap;width:1%">근무형태</th>
+            <th class="r" style="white-space:nowrap;width:1%">시간</th><th class="r" style="white-space:nowrap;width:1%">지급액</th><th style="width:1%;white-space:nowrap">비고</th>
           </tr></thead>
           <tbody id="detailTableBody"></tbody>
         </table>
@@ -480,7 +480,8 @@ function renderDDYear(){
 }
 function renderDDMonth(){
   const MONTHS=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  document.getElementById('ddMonthOpts').innerHTML=MONTHS.map((lbl,i)=>{
+  const allOpt=`<div class="dd-opt${curMonth===0?' sel':''}" style="grid-column:1/-1;border-bottom:1px solid var(--border2)" onclick="pickMonth(0)">전체</div>`;
+  document.getElementById('ddMonthOpts').innerHTML=allOpt+MONTHS.map((lbl,i)=>{
     const m=i+1;
     const ym=`${curYear}-${String(m).padStart(2,'0')}`;
     const has=ALL_RECORDS.some(r=>r.date.startsWith(ym));
@@ -501,7 +502,7 @@ function pickMonth(m){
 }
 function updateMonthLabel(){
   document.getElementById('ddYearLabel').textContent=curYear+'년';
-  document.getElementById('ddMonthLabel').textContent=curMonth+'월';
+  document.getElementById('ddMonthLabel').textContent=curMonth===0?'전체':curMonth+'월';
   const n=filteredRecords().length;
   document.getElementById('monthSub').textContent=n?`총 ${n}건`:'데이터 없음';
 }
@@ -535,7 +536,8 @@ const PROP_KEYS = {
   employee: ['성명','이름','직원','name','employee'],
   hours:    ['시간','hour','연장','overtime'],
   type:     ['근무명','근무','type'],
-  pay:      ['지급','pay','금액','amount']
+  pay:      ['지급','pay','금액','amount'],
+  note:     ['비고','note','memo','메모','remark']
 };
 
 function parseNotionPage(page){
@@ -565,7 +567,7 @@ function parseNotionPage(page){
     if(p.type==='formula') return parseFloat(p.formula?.number||0);
     return parseFloat(getText(p))||0;
   }
-  let employee='',hours=0,type='',pay=0;
+  let employee='',hours=0,type='',pay=0,note='';
   for(const [k,v] of Object.entries(props)){
     const lk=k.toLowerCase();
     if(!employee&&(PROP_KEYS.employee.some(kw=>lk.includes(kw))||v.type==='title'))
@@ -576,9 +578,11 @@ function parseNotionPage(page){
       type=getText(v);
     if(!pay&&PROP_KEYS.pay.some(kw=>lk.includes(kw)))
       pay=getNum(v);
+    if(!note&&PROP_KEYS.note.some(kw=>lk.includes(kw)))
+      note=getText(v);
   }
   if(!employee){const tp=Object.values(props).find(p=>p.type==='title');if(tp)employee=getText(tp);}
-  return {id:page.id,date,employee:employee.trim(),hours,type:type.trim(),pay};
+  return {id:page.id,date,employee:employee.trim(),hours,type:type.trim(),pay,note:note.trim()};
 }
 
 // fetch 1회 요청 헬퍼 (중복 제거)
@@ -671,6 +675,7 @@ function recordsForYM(y,m){
   return ALL_RECORDS.filter(r=>r.date.startsWith(ym));
 }
 function filteredRecords(){
+  if(curMonth===0) return ALL_RECORDS.filter(r=>r.date.startsWith(String(curYear)));
   return recordsForYM(curYear,curMonth);
 }
 function calcEmpMap(recs){
@@ -729,9 +734,10 @@ function buildStackBars(arr, typeList, valueKey, totalKey, labelFn){
 function buildEmpDetailRow(r){
   return `<tr>
     <td style="white-space:nowrap">${fmtDate(r.date)}</td>
-    <td><span class="type-badge type-${typeSlug(r.type||'기타')}">${esc(r.type||'—')}</span></td>
-    <td class="r" style="color:var(--sky600)">${fmtH(r.hours)}h</td>
-    <td class="r pay-cell">${fmtWon(getPayAmt(r))}</td>
+    <td style="white-space:nowrap"><span class="type-badge type-${typeSlug(r.type||'기타')}">${esc(r.type||'—')}</span></td>
+    <td class="r" style="white-space:nowrap;color:var(--sky600)">${fmtH(r.hours)}h</td>
+    <td class="r" style="white-space:nowrap" class="pay-cell">${fmtWon(getPayAmt(r))}</td>
+    <td style="font-size:13px;color:var(--txt2);max-width:120px;word-break:break-all;white-space:pre-wrap">${esc(r.note||'')}</td>
   </tr>`;
 }
 
@@ -879,7 +885,7 @@ function renderEmployee(recs){
       <div class="tbl-wrap">
         <table>
           <thead><tr>
-            <th>날짜</th><th>근무형태</th><th class="r">시간</th><th class="r">지급액</th>
+            <th style="white-space:nowrap;width:1%;min-width:52px">날짜</th><th style="white-space:nowrap;width:1%">근무형태</th><th class="r" style="white-space:nowrap;width:1%">시간</th><th class="r" style="white-space:nowrap;width:1%">지급액</th><th style="width:1%;white-space:nowrap">비고</th>
           </tr></thead>
           <tbody>
             ${empRecs.map(r=>buildEmpDetailRow(r)).join('')}
@@ -887,6 +893,7 @@ function renderEmployee(recs){
               <td colspan="2" style="font-weight:700;color:var(--txt2)">합계</td>
               <td class="r" style="font-weight:700;color:var(--sky600)">${fmtH(empRecs.reduce((s,r)=>s+r.hours,0))}h</td>
               <td class="r" style="font-weight:900;color:var(--teal600);font-size:14px">${fmtWon(empRecs.reduce((s,r)=>s+getPayAmt(r),0))}</td>
+              <td></td>
             </tr>
           </tbody>
         </table>
@@ -898,8 +905,9 @@ function renderEmployee(recs){
 // ── 월별 추이 ─────────────────────────────────────────
 function renderTrend(){
   const months=[];
+  const baseMonth=curMonth===0?12:curMonth;
   for(let i=11;i>=0;i--){
-    let m=curMonth-i,y=curYear;
+    let m=baseMonth-i,y=curYear;
     if(m<1){m+=12;y--;}
     months.push({y,m});
   }
@@ -949,7 +957,7 @@ function renderTrend(){
     </div>`;
 
   document.getElementById('trendChart').innerHTML=data.map(({y,m,label,totalPay})=>{
-    const isCur=y===curYear&&m===curMonth;
+    const isCur=curMonth!==0&&y===curYear&&m===curMonth;
     const h=Math.max(totalPay/maxPay*110,totalPay>0?5:2);
     return `<div class="trend-col">
       <div class="trend-bar-wrap">
@@ -961,7 +969,7 @@ function renderTrend(){
   }).join('');
 
   document.getElementById('trendTableBody').innerHTML=[...data].reverse().map(({y,m,totalPay,cnt,empCnt,typeMap})=>{
-    const isCur=y===curYear&&m===curMonth;
+    const isCur=curMonth!==0&&y===curYear&&m===curMonth;
     const typeBadges=Object.entries(typeMap).sort((a,b)=>b[1]-a[1])
       .map(([t,n])=>`<span class="type-badge type-${typeSlug(t)}">${esc(t)} ${n}</span>`).join('<br style="margin:1px">');
     return `<tr${isCur?' style="background:var(--sky50)"':''}>
@@ -999,12 +1007,13 @@ function renderDetail(recs){
   document.getElementById('detailTableBody').innerHTML=filtered.length
     ?filtered.map(r=>`<tr>
         <td style="white-space:nowrap">${fmtDate(r.date)}</td>
-        <td style="font-weight:600">${esc(r.employee)}</td>
-        <td><span class="type-badge type-${typeSlug(r.type||'기타')}">${esc(r.type||'—')}</span></td>
-        <td class="r" style="color:var(--sky600)">${fmtH(r.hours)}h</td>
-        <td class="r pay-cell">${fmtWon(getPayAmt(r))}</td>
+        <td style="font-weight:600;white-space:nowrap">${esc(r.employee)}</td>
+        <td style="white-space:nowrap"><span class="type-badge type-${typeSlug(r.type||'기타')}">${esc(r.type||'—')}</span></td>
+        <td class="r" style="white-space:nowrap;color:var(--sky600)">${fmtH(r.hours)}h</td>
+        <td class="r pay-cell" style="white-space:nowrap">${fmtWon(getPayAmt(r))}</td>
+        <td style="font-size:13px;color:var(--txt2);max-width:120px;word-break:break-all;white-space:pre-wrap">${esc(r.note||'')}</td>
       </tr>`).join('')
-    :`<tr><td colspan="5">${emptyState('조건에 맞는 내역이 없습니다.','🔍')}</td></tr>`;
+    :`<tr><td colspan="6">${emptyState('조건에 맞는 내역이 없습니다.','🔍')}</td></tr>`;
 }
 
 
@@ -1046,12 +1055,12 @@ const DEMO_DATA = [
   {id:'m23',date:'2025-12-27',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
   {id:'m24',date:'2025-12-28',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
   // ── 2026년 1월 ──
-  {id:'n01',date:'2026-01-01',employee:'직원A', hours:8,  pay:130000, type:'당직근무'},
-  {id:'n02',date:'2026-01-01',employee:'직원B', hours:8,  pay:130000, type:'당직근무'},
-  {id:'n03',date:'2026-01-01',employee:'직원C', hours:8,  pay:130000, type:'당직근무'},
-  {id:'n04',date:'2026-01-01',employee:'직원D', hours:8,  pay:130000, type:'당직근무'},
-  {id:'n05',date:'2026-01-01',employee:'직원E', hours:8,  pay:130000, type:'당직근무'},
-  {id:'n06',date:'2026-01-01',employee:'직원F', hours:8,  pay:130000, type:'당직근무'},
+  {id:'n01',date:'2026-01-01',employee:'직원A', hours:8,  pay:130000, type:'당직근무', note:'신정 당직'},
+  {id:'n02',date:'2026-01-01',employee:'직원B', hours:8,  pay:130000, type:'당직근무', note:'신정 당직'},
+  {id:'n03',date:'2026-01-01',employee:'직원C', hours:8,  pay:130000, type:'당직근무', note:'신정 당직'},
+  {id:'n04',date:'2026-01-01',employee:'직원D', hours:8,  pay:130000, type:'당직근무', note:'신정 당직'},
+  {id:'n05',date:'2026-01-01',employee:'직원E', hours:8,  pay:130000, type:'당직근무', note:'신정 당직'},
+  {id:'n06',date:'2026-01-01',employee:'직원F', hours:8,  pay:130000, type:'당직근무', note:'신정 당직'},
   {id:'n07',date:'2026-01-03',employee:'직원B', hours:24, pay:30000,  type:'비상대기'},
   {id:'n08',date:'2026-01-04',employee:'직원B', hours:24, pay:30000,  type:'비상대기'},
   {id:'n09',date:'2026-01-10',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
@@ -1064,28 +1073,28 @@ const DEMO_DATA = [
   {id:'n16',date:'2026-01-31',employee:'직원D', hours:3,  pay:30000,  type:'당직근무'},
   // ── 2026년 2월 ──
   {id:'n17',date:'2026-02-01',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
-  {id:'n18',date:'2026-02-02',employee:'직원A', hours:15, pay:130000, type:'비상근무'},
+  {id:'n18',date:'2026-02-02',employee:'직원A', hours:15, pay:130000, type:'비상근무', note:'설 연휴 비상근무'},
   {id:'n19',date:'2026-02-07',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
   {id:'n20',date:'2026-02-08',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
   {id:'n21',date:'2026-02-14',employee:'직원B', hours:24, pay:30000,  type:'비상대기'},
   {id:'n22',date:'2026-02-15',employee:'직원B', hours:24, pay:30000,  type:'비상대기'},
-  {id:'n23',date:'2026-02-16',employee:'직원D', hours:8,  pay:130000, type:'당직근무'},
-  {id:'n24',date:'2026-02-17',employee:'직원D', hours:8,  pay:130000, type:'당직근무'},
-  {id:'n25',date:'2026-02-18',employee:'직원D', hours:8,  pay:130000, type:'당직근무'},
+  {id:'n23',date:'2026-02-16',employee:'직원D', hours:8,  pay:130000, type:'당직근무', note:'설 연휴 당직'},
+  {id:'n24',date:'2026-02-17',employee:'직원D', hours:8,  pay:130000, type:'당직근무', note:'설 연휴 당직'},
+  {id:'n25',date:'2026-02-18',employee:'직원D', hours:8,  pay:130000, type:'당직근무', note:'설 연휴 당직'},
   {id:'n26',date:'2026-02-21',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
   {id:'n27',date:'2026-02-22',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
   {id:'n28',date:'2026-02-28',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
   // ── 2026년 3월 ──
   {id:'n29',date:'2026-03-01',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
-  {id:'n30',date:'2026-03-02',employee:'직원A', hours:8,  pay:130000, type:'당직근무'},
+  {id:'n30',date:'2026-03-02',employee:'직원A', hours:8,  pay:130000, type:'당직근무', note:'삼일절 당직'},
   {id:'n31',date:'2026-03-02',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
-  {id:'n32',date:'2026-03-07',employee:'직원A', hours:8,  pay:130000, type:'당직근무'},
+  {id:'n32',date:'2026-03-07',employee:'직원A', hours:8,  pay:130000, type:'당직근무', note:'토요 당직'},
   {id:'n33',date:'2026-03-07',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
   {id:'n34',date:'2026-03-08',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
   {id:'n35',date:'2026-03-14',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
   {id:'n36',date:'2026-03-15',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
   {id:'n37',date:'2026-03-21',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
-  {id:'n38',date:'2026-03-22',employee:'직원A', hours:24, pay:130000, type:'비상출동'},
+  {id:'n38',date:'2026-03-22',employee:'직원A', hours:24, pay:130000, type:'비상출동', note:'야간 긴급출동'},
   {id:'n39',date:'2026-03-28',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
   {id:'n40',date:'2026-03-29',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
   // ── 2026년 4월 ──
@@ -1093,11 +1102,11 @@ const DEMO_DATA = [
   {id:'n42',date:'2026-04-05',employee:'직원B', hours:24, pay:30000,  type:'비상대기'},
   {id:'n43',date:'2026-04-11',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
   {id:'n44',date:'2026-04-12',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
-  {id:'n45',date:'2026-04-18',employee:'직원A', hours:8,  pay:130000, type:'당직근무'},
+  {id:'n45',date:'2026-04-18',employee:'직원A', hours:8,  pay:130000, type:'당직근무', note:'토요 당직'},
   {id:'n46',date:'2026-04-18',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
-  {id:'n47',date:'2026-04-19',employee:'직원A', hours:8,  pay:130000, type:'당직근무'},
+  {id:'n47',date:'2026-04-19',employee:'직원A', hours:8,  pay:130000, type:'당직근무', note:'일요 당직'},
   {id:'n48',date:'2026-04-19',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
-  {id:'n49',date:'2026-04-25',employee:'직원A', hours:8,  pay:130000, type:'당직근무'},
+  {id:'n49',date:'2026-04-25',employee:'직원A', hours:8,  pay:130000, type:'당직근무', note:'토요 당직'},
   {id:'n50',date:'2026-04-25',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
   {id:'n51',date:'2026-04-26',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
 
