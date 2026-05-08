@@ -589,6 +589,9 @@ function parseNotionPage(page){
       note=getText(v);
   }
   if(!employee){const tp=Object.values(props).find(p=>p.type==='title');if(tp)employee=getText(tp);}
+  // 근무형태별 시간 고정값
+  const TYPE_HOURS={'비상대기':24,'당직근무':8};
+  if(TYPE_HOURS[type.trim()]!==undefined) hours=TYPE_HOURS[type.trim()];
   return {id:page.id,date,employee:employee.trim(),hours,type:type.trim(),pay,note:note.trim()};
 }
 
@@ -1050,7 +1053,7 @@ const DEMO_DATA = [
   {id:'m03',date:'2025-11-08',employee:'직원C', hours:8,  pay:130000, type:'당직근무'},
   {id:'m04',date:'2025-11-08',employee:'직원D', hours:8,  pay:130000, type:'당직근무'},
   {id:'m05',date:'2025-11-08',employee:'직원E', hours:8,  pay:130000, type:'당직근무'},
-  {id:'m06',date:'2025-11-08',employee:'직원B', hours:15, pay:15000,  type:'비상대기'},
+  {id:'m06',date:'2025-11-08',employee:'직원B', hours:24, pay:15000,  type:'비상대기'},
   {id:'m07',date:'2025-11-09',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
   {id:'m08',date:'2025-11-15',employee:'직원B', hours:24, pay:30000,  type:'비상대기'},
   {id:'m09',date:'2025-11-16',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
@@ -1061,8 +1064,8 @@ const DEMO_DATA = [
   // ── 2025년 12월 ──
   {id:'m14',date:'2025-12-06',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
   {id:'m15',date:'2025-12-07',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
-  {id:'m16',date:'2025-12-08',employee:'직원A', hours:15, pay:130000, type:'당직근무'},
-  {id:'m17',date:'2025-12-11',employee:'직원D', hours:3,  pay:30000,  type:'당직근무'},
+  {id:'m16',date:'2025-12-08',employee:'직원A', hours:8, pay:130000, type:'당직근무'},
+  {id:'m17',date:'2025-12-11',employee:'직원D', hours:8,  pay:30000,  type:'당직근무'},
   {id:'m18',date:'2025-12-13',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
   {id:'m19',date:'2025-12-14',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
   {id:'m20',date:'2025-12-20',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
@@ -1086,7 +1089,7 @@ const DEMO_DATA = [
   {id:'n13',date:'2026-01-24',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
   {id:'n14',date:'2026-01-25',employee:'직원D', hours:24, pay:30000,  type:'비상대기'},
   {id:'n15',date:'2026-01-31',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
-  {id:'n16',date:'2026-01-31',employee:'직원D', hours:3,  pay:30000,  type:'당직근무'},
+  {id:'n16',date:'2026-01-31',employee:'직원D', hours:8,  pay:30000,  type:'당직근무'},
   // ── 2026년 2월 ──
   {id:'n17',date:'2026-02-01',employee:'직원A', hours:24, pay:30000,  type:'비상대기'},
   {id:'n18',date:'2026-02-02',employee:'직원A', hours:15, pay:130000, type:'비상근무', note:'설 연휴 비상근무'},
