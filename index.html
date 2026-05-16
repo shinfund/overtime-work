@@ -707,7 +707,7 @@ function buildEmpDetailRow(r){
     <td style="white-space:nowrap">${fmtDate(r.date)}</td>
     <td style="white-space:nowrap"><span class="type-badge type-${typeSlug(r.type||'기타')}">${esc(r.type||'—')}</span></td>
     <td class="r" style="white-space:nowrap;color:var(--sky600)">${fmtH(r.hours)}h</td>
-    <td class="r" style="white-space:nowrap" class="pay-cell">${fmtWon(getPayAmt(r))}</td>
+    <td class="r pay-cell" style="white-space:nowrap">${fmtWon(getPayAmt(r))}</td>
     <td style="font-size:13px;color:var(--txt2);white-space:nowrap">${esc(r.note||'')}</td>
   </tr>`;
 }
@@ -726,7 +726,6 @@ function renderAll(){
 // ── 요약 ──────────────────────────────────────────────
 function renderSummary(recs){
   recs=recs||filteredRecords();
-  const totalH=recs.reduce((s,r)=>s+r.hours,0);
   const totalPay=recs.reduce((s,r)=>s+getPayAmt(r),0);
   const empTypeMap=calcEmpMap(recs);
   const typeMap={};
