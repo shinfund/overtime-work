@@ -168,17 +168,12 @@ tr:hover td{background:var(--sky50)}
       <div class="modal-field">
         <label class="modal-label">Google Sheets ID</label>
         <input id="cfgSheetId" class="modal-input" type="text" placeholder="https://docs.google.com/spreadsheets/d/..."/>
-        <div class="modal-hint">스프레드시트 링크 전체 또는 ID만 붙여넣기 · 시트는 반드시 <strong>링크 공유(뷰어)</strong>로 설정</div>
+        <div class="modal-hint">스프레드시트 URL 전체 붙여넣기 OK · <strong>링크 공유(뷰어)</strong> 설정 필요</div>
       </div>
       <div class="modal-field">
         <label class="modal-label">시트 이름 <span style="font-weight:400;color:var(--txt3)">(선택 — 비워두면 첫 번째 시트)</span></label>
         <input id="cfgSheetName" class="modal-input" type="text" placeholder="연장근무DB"/>
-        <div class="modal-hint">시트 탭 이름과 정확히 일치 (한글 OK)</div>
-      </div>
-      <div style="background:var(--sky50);border:1px solid var(--sky100);border-radius:var(--r8);padding:11px 13px;font-size:12px;color:var(--txt2);margin-bottom:14px;line-height:2">
-        📋 <strong>시트 1행 헤더 순서:</strong><br>
-        A: 날짜(YYYY-MM-DD) &nbsp;|&nbsp; B: 성명 &nbsp;|&nbsp; C: 근무형태<br>
-        D: 시간(숫자) &nbsp;|&nbsp; E: 지급액(숫자) &nbsp;|&nbsp; F: 비고
+        <div class="modal-hint">탭 이름과 정확히 일치 (한글 OK)</div>
       </div>
       <div class="modal-btns">
         <button class="modal-cancel" onclick="closeCfgModal()">취소</button>
