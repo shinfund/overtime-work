@@ -162,18 +162,23 @@ tr:hover td{background:var(--sky50)}
   <div class="modal-backdrop" onclick="closeCfgModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-title">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        설정
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0F9D58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        Google Sheets 연동 설정
       </div>
       <div class="modal-field">
-        <label class="modal-label">Cloudflare Worker URL</label>
-        <input id="cfgWorkerUrl" class="modal-input" type="text" placeholder="https://your-worker.workers.dev"/>
-        <div class="modal-hint">저장된 값은 XX로 마스킹 표시 · 변경 시에만 새로 입력하세요</div>
+        <label class="modal-label">Google Sheets ID</label>
+        <input id="cfgSheetId" class="modal-input" type="text" placeholder="https://docs.google.com/spreadsheets/d/..."/>
+        <div class="modal-hint">스프레드시트 링크 전체 또는 ID만 붙여넣기 · 시트는 반드시 <strong>링크 공유(뷰어)</strong>로 설정</div>
       </div>
       <div class="modal-field">
-        <label class="modal-label">노션 DB ID</label>
-        <input id="cfgDbId" class="modal-input" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"/>
-        <div class="modal-hint">저장된 값은 XX로 마스킹 표시 · 변경 시에만 새로 입력하세요</div>
+        <label class="modal-label">시트 이름 <span style="font-weight:400;color:var(--txt3)">(선택 — 비워두면 첫 번째 시트)</span></label>
+        <input id="cfgSheetName" class="modal-input" type="text" placeholder="연장근무DB"/>
+        <div class="modal-hint">시트 탭 이름과 정확히 일치 (한글 OK)</div>
+      </div>
+      <div style="background:var(--sky50);border:1px solid var(--sky100);border-radius:var(--r8);padding:11px 13px;font-size:12px;color:var(--txt2);margin-bottom:14px;line-height:2">
+        📋 <strong>시트 1행 헤더 순서:</strong><br>
+        A: 날짜(YYYY-MM-DD) &nbsp;|&nbsp; B: 성명 &nbsp;|&nbsp; C: 근무형태<br>
+        D: 시간(숫자) &nbsp;|&nbsp; E: 지급액(숫자) &nbsp;|&nbsp; F: 비고
       </div>
       <div class="modal-btns">
         <button class="modal-cancel" onclick="closeCfgModal()">취소</button>
@@ -192,7 +197,7 @@ tr:hover td{background:var(--sky50)}
     </div>
     <div>
       <div class="logo-title">연장근무현황</div>
-      <div class="logo-sub">Notion 실시간 연동</div>
+      <div class="logo-sub">Google Sheets 연동</div>
     </div>
   </div>
   <div class="header-right">
@@ -201,7 +206,7 @@ tr:hover td{background:var(--sky50)}
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         설정
       </button>
-      <button class="hdr-btn" id="syncBtn" aria-label="Notion 데이터 새로고침" aria-busy="false" onclick="loadData()">
+      <button class="hdr-btn" id="syncBtn" aria-label="Google Sheets 데이터 새로고침" aria-busy="false" onclick="loadData()">
         <svg id="syncIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         <span id="syncLabel">새로고침</span>
       </button>
@@ -353,10 +358,10 @@ tr:hover td{background:var(--sky50)}
 let CFG = (()=>{
   try{
     return {
-      workerUrl: localStorage.getItem('ot_workerUrl')||'',
-      dbId:      localStorage.getItem('ot_dbId')||''
+      sheetId:   localStorage.getItem('ot_sheetId')||'',
+      sheetName: localStorage.getItem('ot_sheetName')||''
     };
-  }catch(e){ return {workerUrl:'',dbId:''}; }
+  }catch(e){ return {sheetId:'',sheetName:''}; }
 })();
 
 function fmtDate(d){
@@ -374,37 +379,15 @@ function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').repla
 // ── 모달 ──────────────────────────────────────────────
 function maskVal(v){
   if(!v) return '';
-  // https://xxxx.workers.dev 형태 → https://XX...XX.workers.dev
-  // DB ID 형태 → XXXX-XXXX-...-XXXX (앞 4자리·뒤 4자리만 표시)
-  if(v.startsWith('http')){
-    try{
-      const u=new URL(v);
-      const h=u.hostname; // xxxx.workers.dev
-      const parts=h.split('.');
-      const masked=parts[0].length>4
-        ? parts[0].slice(0,2)+'XX'+parts[0].slice(-2)+'.'+parts.slice(1).join('.')
-        : 'XX.'+parts.slice(1).join('.');
-      return u.protocol+'//'+masked;
-    }catch(e){
-      return v.slice(0,6)+'XX...XX'+v.slice(-4);
-    }
-  }
-  // UUID 형태 (DB ID)
-  if(/^[0-9a-f\-]{32,36}$/i.test(v)){
-    const clean=v.replace(/-/g,'');
-    return clean.slice(0,4)+'-XXXX-XXXX-XXXX-'+clean.slice(-4);
-  }
-  return v.slice(0,3)+'XX...XX'+v.slice(-3);
+  if(v.length>12) return v.slice(0,4)+'...'+v.slice(-4);
+  return v;
 }
 function openCfgModal(){
-  const wu=CFG.workerUrl, db=CFG.dbId;
-  const wEl=document.getElementById('cfgWorkerUrl');
-  const dEl=document.getElementById('cfgDbId');
-  // 저장된 값이 있으면 마스킹 표시 + placeholder로 안내
-  if(wu){ wEl.value=''; wEl.placeholder=maskVal(wu); wEl.dataset.saved='1'; }
-  else   { wEl.value=''; wEl.placeholder='https://your-worker.workers.dev'; delete wEl.dataset.saved; }
-  if(db){ dEl.value=''; dEl.placeholder=maskVal(db); dEl.dataset.saved='1'; }
-  else   { dEl.value=''; dEl.placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'; delete dEl.dataset.saved; }
+  const sEl=document.getElementById('cfgSheetId');
+  const nEl=document.getElementById('cfgSheetName');
+  sEl.value=CFG.sheetId?'':'' ;
+  sEl.placeholder=CFG.sheetId?maskVal(CFG.sheetId):'1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms';
+  nEl.value=CFG.sheetName||'';
   document.getElementById('cfgModal').classList.add('modal-open');
   document.body.style.overflow='hidden';
 }
@@ -417,22 +400,25 @@ function closeCfgModal(e){
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape') closeCfgModal();
 });
+function extractSheetId(v){
+  // URL 전체 붙여넣기 시 ID 자동 추출
+  const m=v.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  return m?m[1]:v;
+}
 function saveCfg(){
-  const wEl=document.getElementById('cfgWorkerUrl');
-  const dEl=document.getElementById('cfgDbId');
-  // 입력값이 있으면 새 값으로, 없으면 기존 저장값 유지
-  const newWu=wEl.value.trim();
-  const newDb=dEl.value.trim();
-  if(newWu) CFG.workerUrl=newWu;
-  if(newDb) CFG.dbId=newDb;
+  const sEl=document.getElementById('cfgSheetId');
+  const nEl=document.getElementById('cfgSheetName');
+  const newId=extractSheetId(sEl.value.trim());
+  const newName=nEl.value.trim();
+  if(newId) CFG.sheetId=newId;
+  if(newName!==undefined) CFG.sheetName=newName;
   try{
-    localStorage.setItem('ot_workerUrl',CFG.workerUrl);
-    localStorage.setItem('ot_dbId',CFG.dbId);
+    localStorage.setItem('ot_sheetId',CFG.sheetId);
+    localStorage.setItem('ot_sheetName',CFG.sheetName);
   }catch(e){}
   document.getElementById('cfgModal').classList.remove('modal-open');
   document.body.style.overflow='';
-  // 설정 변경 시 기존 데이터 초기화 후 새 설정으로 재로드
-  if(CFG.workerUrl && CFG.dbId){
+  if(CFG.sheetId){
     ALL_RECORDS=[];
     loadData();
   }
@@ -492,14 +478,14 @@ function pickYear(y){
   curYear=y; ddYearBase=y;
   closeAllDD();
   updateMonthLabel();
-  if(CFG.workerUrl&&CFG.dbId){ loadData(); }
+  if(CFG.sheetId){ loadData(); }
   else if(ALL_RECORDS.length){ renderAll(); }
 }
 function pickMonth(m){
   curMonth=m;
   closeAllDD();
   updateMonthLabel();
-  if(CFG.workerUrl&&CFG.dbId){ loadData(); }
+  if(CFG.sheetId){ loadData(); }
   else if(ALL_RECORDS.length){ renderAll(); }
 }
 function updateMonthLabel(){
@@ -532,91 +518,81 @@ function switchPanel(name){
 // ── 전역 데이터 ───────────────────────────────────────
 let ALL_RECORDS=[];
 
-// ── parseNotionPage ───────────────────────────────────
-// Notion 속성명 키워드 (DB 속성명이 달라질 경우 여기서 수정)
-const PROP_KEYS = {
+// ── Google Sheets CSV 파싱 ────────────────────────────
+// 헤더 키워드 매핑 (1행 헤더명 자동 인식)
+const COL_KEYS = {
+  date:     ['날짜','date','일자'],
   employee: ['성명','이름','직원','name','employee'],
+  type:     ['근무형태','근무명','근무','type'],
   hours:    ['시간','hour','연장','overtime'],
-  type:     ['근무명','근무','type'],
-  pay:      ['지급','pay','금액','amount'],
+  pay:      ['지급액','지급','pay','금액','amount'],
   note:     ['비고','note','memo','메모','remark']
 };
 
-function parseNotionPage(page){
-  const props=page.properties||{};
-  // date 타입 우선, 없으면 created_time fallback
-  let date='';
-  for(const [,v] of Object.entries(props)){
-    if(v.type==='date'&&v.date){date=(v.date.start||'').slice(0,10);break;}
-  }
-  if(!date){
-    for(const [,v] of Object.entries(props)){
-      if(v.type==='created_time'&&v.created_time){date=v.created_time.slice(0,10);break;}
+function detectColIdx(headers){
+  const idx={date:-1,employee:-1,type:-1,hours:-1,pay:-1,note:-1};
+  headers.forEach((h,i)=>{
+    const lh=(h||'').toLowerCase().trim();
+    for(const [field,keys] of Object.entries(COL_KEYS)){
+      if(idx[field]===-1 && keys.some(k=>lh.includes(k))) idx[field]=i;
     }
-  }
-  function getText(p){
-    if(!p) return '';
-    if(p.type==='title')    return p.title?.map(t=>t.plain_text||'').join('')||'';
-    if(p.type==='rich_text')return p.rich_text?.map(t=>t.plain_text||'').join('')||'';
-    if(p.type==='select')   return p.select?.name||'';
-    if(p.type==='number')   return String(p.number??'');
-    if(p.type==='formula')  return String(p.formula?.number??p.formula?.string??'');
-    return '';
-  }
-  function getNum(p){
-    if(!p) return 0;
-    if(p.type==='number') return parseFloat(p.number||0);
-    if(p.type==='formula') return parseFloat(p.formula?.number||0);
-    return parseFloat(getText(p))||0;
-  }
-  let employee='',hours=0,type='',pay=0,note='';
-  for(const [k,v] of Object.entries(props)){
-    const lk=k.toLowerCase();
-    // 성명: title 타입 우선
-    if(!employee&&(PROP_KEYS.employee.some(kw=>lk.includes(kw))||v.type==='title'))
-      employee=getText(v)||employee;
-    // 시간: number/formula 타입인 경우에만 매칭 (select와 충돌 방지)
-    if(!hours&&PROP_KEYS.hours.some(kw=>lk.includes(kw))&&(v.type==='number'||v.type==='formula'||v.type==='rich_text'))
-      hours=getNum(v);
-    // 근무형태: select 또는 rich_text
-    if(!type&&PROP_KEYS.type.some(kw=>lk.includes(kw))&&(v.type==='select'||v.type==='rich_text'||v.type==='title'))
-      type=getText(v);
-    // 지급액: number/formula
-    if(!pay&&PROP_KEYS.pay.some(kw=>lk.includes(kw))&&(v.type==='number'||v.type==='formula'))
-      pay=getNum(v);
-    // 비고: rich_text
-    if(!note&&PROP_KEYS.note.some(kw=>lk.includes(kw)))
-      note=getText(v);
-  }
-  if(!employee){const tp=Object.values(props).find(p=>p.type==='title');if(tp)employee=getText(tp);}
-  // 근무형태별 시간 고정값
-  const TYPE_HOURS={'비상대기':24,'당직근무':8};
-  if(TYPE_HOURS[type.trim()]!==undefined) hours=TYPE_HOURS[type.trim()];
-  return {id:page.id,date,employee:employee.trim(),hours,type:type.trim(),pay,note:note.trim()};
+  });
+  // fallback: 헤더 없으면 A~F 순서로 고정
+  if(idx.date===-1)     idx.date=0;
+  if(idx.employee===-1) idx.employee=1;
+  if(idx.type===-1)     idx.type=2;
+  if(idx.hours===-1)    idx.hours=3;
+  if(idx.pay===-1)      idx.pay=4;
+  if(idx.note===-1)     idx.note=5;
+  return idx;
 }
 
-// fetch 1회 요청 헬퍼 (중복 제거)
-function detectDatePropName(pages){
-  if(!pages||!pages.length) return 'date';
-  const props=pages[0].properties||{};
-  for(const [k,v] of Object.entries(props)){
-    if(v.type==='date') return k;
+function parseCSV(text){
+  // RFC 4180 준수 CSV 파서 (쌍따옴표 이스케이프 처리)
+  const rows=[];
+  let row=[], field='', inQ=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(inQ){
+      if(c==='"'){
+        if(text[i+1]==='"'){field+='"';i++;}
+        else inQ=false;
+      } else field+=c;
+    } else {
+      if(c==='"'){inQ=true;}
+      else if(c===','){row.push(field);field='';}
+      else if(c==='\n'){row.push(field);field='';rows.push(row);row=[];}
+      else if(c!=='\r'){field+=c;}
+    }
   }
-  for(const [k,v] of Object.entries(props)){
-    if(v.type==='created_time') return k;
-  }
-  return 'date';
+  if(field||row.length){row.push(field);rows.push(row);}
+  return rows;
 }
-async function fetchNotion(workerUrl, dbId, body){
-  const res=await fetch(`${workerUrl}/v1/databases/${dbId}/query`,{
-    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)
-  });
-  if(!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+
+function parseSheetRows(rows){
+  if(!rows||rows.length<2) return [];
+  const headers=rows[0];
+  const idx=detectColIdx(headers);
+  const TYPE_HOURS={'비상대기':24,'당직근무':8};
+  const records=[];
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i];
+    const date=(r[idx.date]||'').trim().slice(0,10);
+    if(!date||!/^\d{4}-\d{2}/.test(date)) continue; // 날짜 없는 행 스킵
+    const employee=(r[idx.employee]||'').trim();
+    if(!employee) continue;
+    const type=(r[idx.type]||'').trim();
+    let hours=parseFloat(r[idx.hours])||0;
+    if(TYPE_HOURS[type]!==undefined) hours=TYPE_HOURS[type];
+    const pay=parseFloat((r[idx.pay]||'').replace(/,/g,''))||0;
+    const note=(r[idx.note]||'').trim();
+    records.push({id:`gs-${i}`,date,employee,type,hours,pay,note});
+  }
+  return records;
 }
 
 async function loadData(){
-  if(!CFG.workerUrl||!CFG.dbId){openCfgModal();return;}
+  if(!CFG.sheetId){ openCfgModal(); return; }
   const btn=document.getElementById('syncBtn');
   const lu=document.getElementById('lastUpdate');
   btn.disabled=true;
@@ -625,64 +601,43 @@ async function loadData(){
   const syncLabel=document.getElementById('syncLabel');
   if(syncIcon) syncIcon.classList.add('spinning');
   if(syncLabel) syncLabel.textContent='불러오는 중...';
-  if(lu){lu.textContent='';}
+  if(lu){ lu.textContent=''; }
   try{
-    // 전체(curMonth=0): 해당 연도 말 / 특정 월: 해당 월 말일
-    // 단, endDate가 오늘보다 미래면 오늘로 cap (불필요한 미래 조회 방지 X → 오늘까지만)
-    const _today=new Date();
-    const _todayStr=_today.toISOString().slice(0,10);
-    const endDate=curMonth===0
-      ? `${curYear}-12-31`
-      : new Date(curYear,curMonth,0).toISOString().slice(0,10);
-    // 조회 시작: 전체면 해당 연도 1월 1일, 특정 월이면 13개월 전
-    const sixAgo=curMonth===0
-      ? `${curYear}-01-01`
-      : new Date(curYear,curMonth-13,1).toISOString().slice(0,10);
-
-    // 첫 페이지 1건으로 날짜 속성명 자동 감지
-    const probeData=await fetchNotion(CFG.workerUrl, CFG.dbId, {
-      page_size:1
-    });
-    const dateProp=detectDatePropName(probeData.results||[]);
-
-    const body={
-      page_size:100,
-      filter:{and:[
-        {property:dateProp,date:{on_or_after:sixAgo}},
-        {property:dateProp,date:{on_or_before:endDate}}
-      ]},
-      sorts:[{property:dateProp,direction:'ascending'}]
-    };
-    const data=await fetchNotion(CFG.workerUrl, CFG.dbId, body);
-    let pages=data.results||[];
-    let cursor=data.next_cursor,hasMore=data.has_more;
-    let pageCount=0;
-    const MAX_PAGES=20; // 무한루프 방어
-    while(cursor&&hasMore&&pageCount++<MAX_PAGES){
-      const d2=await fetchNotion(CFG.workerUrl, CFG.dbId, {...body,start_cursor:cursor});
-      pages=[...pages,...(d2.results||[])];
-      cursor=d2.next_cursor;hasMore=d2.has_more;
+    // Google Sheets 공개 CSV URL
+    // 시트명이 있으면 gid 없이 sheetName 파라미터 사용
+    let csvUrl;
+    if(CFG.sheetName){
+      // 시트명 → URL 인코딩
+      const enc=encodeURIComponent(CFG.sheetName);
+      csvUrl=`https://docs.google.com/spreadsheets/d/${CFG.sheetId}/gviz/tq?tqx=out:csv&sheet=${enc}`;
+    } else {
+      csvUrl=`https://docs.google.com/spreadsheets/d/${CFG.sheetId}/export?format=csv`;
     }
-    ALL_RECORDS=pages.map(parseNotionPage).filter(r=>r.date&&r.employee);
+    const res=await fetch(csvUrl);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text=await res.text();
+    if(text.includes('<html')||text.includes('<!DOCTYPE')){
+      throw new Error('시트 공유 설정 오류 — Google Sheets에서 "링크가 있는 모든 사용자(뷰어)"로 설정하세요');
+    }
+    const rows=parseCSV(text);
+    const records=parseSheetRows(rows);
+    if(!records.length) throw new Error('데이터가 없거나 열 형식이 맞지 않습니다');
+    ALL_RECORDS=records;
     renderAll();
     const now=new Date();
     const ts=`${String(now.getMonth()+1).padStart(2,'0')}. ${String(now.getDate()).padStart(2,'0')}. `
              +now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
-    if(lu){lu.textContent='마지막 업데이트: '+ts;lu.style.color='rgba(255,255,255,.75)';}
+    if(lu){ lu.textContent='마지막 업데이트: '+ts; lu.style.color='rgba(255,255,255,.75)'; }
   }catch(e){
-    // 에러 시 내장 데이터로 복귀
     if(!ALL_RECORDS.length){ ALL_RECORDS=DEMO_DATA; renderAll(); }
     let msg='⚠ '+e.message;
-    if(e.message.includes('400')) msg='⚠ HTTP 400 — Worker URL 또는 DB ID를 확인하세요';
-    else if(e.message.includes('401')||e.message.includes('403')) msg='⚠ 인증 오류 — Notion API 키를 확인하세요';
-    else if(e.message.includes('404')) msg='⚠ DB를 찾을 수 없습니다 — DB ID를 확인하세요';
-    else if(e.message.includes('Failed to fetch')) msg='⚠ 네트워크 오류 — Worker URL을 확인하세요';
-    if(lu){lu.textContent=msg;lu.style.color='rgba(255,150,130,.9)';}
+    if(e.message.includes('403')||e.message.includes('401')) msg='⚠ 접근 권한 없음 — 시트를 "링크 공유(뷰어)"로 설정하세요';
+    else if(e.message.includes('404')) msg='⚠ 시트를 찾을 수 없습니다 — Sheets ID를 확인하세요';
+    else if(e.message.includes('Failed to fetch')||e.message.includes('NetworkError')) msg='⚠ 네트워크 오류 — 인터넷 연결을 확인하세요';
+    if(lu){ lu.textContent=msg; lu.style.color='rgba(255,150,130,.9)'; }
   }finally{
     btn.disabled=false;
     btn.setAttribute('aria-busy','false');
-    const syncIcon=document.getElementById('syncIcon');
-    const syncLabel=document.getElementById('syncLabel');
     if(syncIcon) syncIcon.classList.remove('spinning');
     if(syncLabel) syncLabel.textContent='새로고침';
   }
@@ -1045,7 +1000,7 @@ function emptyState(desc, icon='📋'){
     <div class="empty-desc">${desc}</div></div>`;
 }
 
-// ── 내장 데이터 (Notion 연장근무 DB 실제 데이터 — 2025-11 ~ 2026-05) ──
+// ── 내장 데이터 (연장근무 DB 샘플 데이터 — 2025-11 ~ 2026-05) ──
 const DEMO_DATA = [
   // ── 2025년 11월 ──
   {id:'m01',date:'2025-11-08',employee:'직원A', hours:8,  pay:130000, type:'당직근무'},
@@ -1164,7 +1119,7 @@ renderAll();
 
 // 설정값이 있으면 페이지 로드 시 자동 새로고침
 (()=>{
-  if(CFG.workerUrl && CFG.dbId){
+  if(CFG.sheetId){
     loadData();
   }
 })();
