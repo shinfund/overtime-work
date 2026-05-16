@@ -385,8 +385,8 @@ function maskVal(v){
 function openCfgModal(){
   const sEl=document.getElementById('cfgSheetId');
   const nEl=document.getElementById('cfgSheetName');
-  sEl.value=CFG.sheetId?'':'' ;
-  sEl.placeholder=CFG.sheetId?maskVal(CFG.sheetId):'1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms';
+  sEl.value=CFG.sheetId||'';
+  sEl.placeholder='https://docs.google.com/spreadsheets/d/...';
   nEl.value=CFG.sheetName||'';
   document.getElementById('cfgModal').classList.add('modal-open');
   document.body.style.overflow='hidden';
@@ -408,13 +408,15 @@ function extractSheetId(v){
 function saveCfg(){
   const sEl=document.getElementById('cfgSheetId');
   const nEl=document.getElementById('cfgSheetName');
-  const newId=extractSheetId(sEl.value.trim());
+  const rawId=sEl.value.trim();
+  const newId=rawId?extractSheetId(rawId):'';
   const newName=nEl.value.trim();
+  // 값이 있을 때만 업데이트 (비워서 저장 시 기존값 유지)
   if(newId) CFG.sheetId=newId;
-  if(newName!==undefined) CFG.sheetName=newName;
+  CFG.sheetName=newName; // 시트명은 비워도 업데이트 허용
   try{
-    localStorage.setItem('ot_sheetId',CFG.sheetId);
-    localStorage.setItem('ot_sheetName',CFG.sheetName);
+    localStorage.setItem('ot_sheetId',CFG.sheetId||'');
+    localStorage.setItem('ot_sheetName',CFG.sheetName||'');
   }catch(e){}
   document.getElementById('cfgModal').classList.remove('modal-open');
   document.body.style.overflow='';
@@ -605,14 +607,9 @@ async function loadData(){
   try{
     // Google Sheets 공개 CSV URL
     // 시트명이 있으면 gid 없이 sheetName 파라미터 사용
-    let csvUrl;
-    if(CFG.sheetName){
-      // 시트명 → URL 인코딩
-      const enc=encodeURIComponent(CFG.sheetName);
-      csvUrl=`https://docs.google.com/spreadsheets/d/${CFG.sheetId}/gviz/tq?tqx=out:csv&sheet=${enc}`;
-    } else {
-      csvUrl=`https://docs.google.com/spreadsheets/d/${CFG.sheetId}/export?format=csv`;
-    }
+    // gviz/tq 엔드포인트로 통일 (CORS 안전, sheet 파라미터 없으면 첫 번째 시트)
+    const enc=CFG.sheetName?`&sheet=${encodeURIComponent(CFG.sheetName)}`:'';
+    const csvUrl=`https://docs.google.com/spreadsheets/d/${CFG.sheetId}/gviz/tq?tqx=out:csv${enc}`;
     const res=await fetch(csvUrl);
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const text=await res.text();
@@ -757,35 +754,62 @@ function renderSummary(recs){
   document.getElementById('sumCntChart').innerHTML=
     buildStackBars(empCntArr, allCntTypes, 'count', 'count', v=>v+'건');
 
-  // 지급금액 요약 (컴팩트 3셀)
-  let pm=curMonth-1,py=curYear;
-  if(pm<1){pm=12;py--;}
-  const prevRecs=recordsForYM(py,pm);
-  const prevPay=prevRecs.reduce((s,r)=>s+getPayAmt(r),0);
-  const diffPay=totalPay-prevPay;
-  const sign=n=>n>=0?'+':'';
-  const isUp=diffPay>=0;
-  const diffColor=isUp?'var(--coral)':'var(--teal600)';
-  const diffBg=isUp?'var(--coral50)':'var(--teal50)';
-  const diffBorder=isUp?'var(--coral100)':'var(--teal100)';
-  document.getElementById('sumCompare').innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
-      <div style="background:var(--sky50);border:1px solid var(--sky100);border-radius:var(--r12);padding:10px 12px">
-        <div style="font-size:12px;font-weight:600;color:var(--sky600);margin-bottom:3px">전월 지급액</div>
-        <div style="font-size:15px;font-weight:800;color:var(--sky800);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${fmtWon(prevPay)}</div>
-        <div style="font-size:12px;color:var(--txt2);margin-top:2px">${py}년 ${pm}월</div>
-      </div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r12);padding:10px 12px">
-        <div style="font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:3px">당월 지급액</div>
-        <div style="font-size:15px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${fmtWon(totalPay)}</div>
-        <div style="font-size:12px;color:var(--txt2);margin-top:2px">${curYear}년 ${curMonth}월</div>
-      </div>
-      <div style="background:${diffBg};border:1px solid ${diffBorder};border-radius:var(--r12);padding:10px 12px">
-        <div style="font-size:12px;font-weight:600;color:${diffColor};margin-bottom:3px">전월 대비</div>
-        <div style="font-size:15px;font-weight:800;color:${diffColor};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sign(diffPay)}${fmtWon(Math.abs(diffPay))}</div>
-        <div style="font-size:12px;font-weight:600;color:${diffColor};margin-top:2px">${diffPay===0?'변동 없음':isUp?'증가':'감소'}</div>
-      </div>
-    </div>`;
+  // 지급금액 요약 (컴팩트 3셀) — 전체(curMonth=0) 모드 대응
+  if(curMonth===0){
+    // 전체 모드: 연간 합계 카드 (전월 대비 없음)
+    const allRecs2=ALL_RECORDS.filter(r=>r.date.startsWith(String(curYear)));
+    const yearPay=allRecs2.reduce((s,r)=>s+getPayAmt(r),0);
+    const yearCnt=allRecs2.length;
+    const yearEmps=new Set(allRecs2.map(r=>r.employee).filter(Boolean)).size;
+    document.getElementById('sumCompare').innerHTML=`
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="background:var(--sky50);border:1px solid var(--sky100);border-radius:var(--r12);padding:10px 12px">
+          <div style="font-size:12px;font-weight:600;color:var(--sky600);margin-bottom:3px">${curYear}년 연간</div>
+          <div style="font-size:15px;font-weight:800;color:var(--sky800);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${fmtWon(yearPay)}</div>
+          <div style="font-size:12px;color:var(--txt2);margin-top:2px">총 지급액</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r12);padding:10px 12px">
+          <div style="font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:3px">총 건수</div>
+          <div style="font-size:15px;font-weight:800;color:var(--txt)">${yearCnt}<span style="font-size:12px;font-weight:500">건</span></div>
+          <div style="font-size:12px;color:var(--txt2);margin-top:2px">연간 합산</div>
+        </div>
+        <div style="background:var(--teal50);border:1px solid var(--teal100);border-radius:var(--r12);padding:10px 12px">
+          <div style="font-size:12px;font-weight:600;color:var(--teal600);margin-bottom:3px">참여 인원</div>
+          <div style="font-size:15px;font-weight:800;color:var(--teal600)">${yearEmps}<span style="font-size:12px;font-weight:500">명</span></div>
+          <div style="font-size:12px;color:var(--txt2);margin-top:2px">연간 합산</div>
+        </div>
+      </div>`;
+  } else {
+    // 특정 월 모드: 전월 대비 카드
+    let pm=curMonth-1,py=curYear;
+    if(pm<1){pm=12;py--;}
+    const prevRecs=recordsForYM(py,pm);
+    const prevPay=prevRecs.reduce((s,r)=>s+getPayAmt(r),0);
+    const diffPay=totalPay-prevPay;
+    const sign=n=>n>=0?'+':'';
+    const isUp=diffPay>=0;
+    const diffColor=isUp?'var(--coral)':'var(--teal600)';
+    const diffBg=isUp?'var(--coral50)':'var(--teal50)';
+    const diffBorder=isUp?'var(--coral100)':'var(--teal100)';
+    document.getElementById('sumCompare').innerHTML=`
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="background:var(--sky50);border:1px solid var(--sky100);border-radius:var(--r12);padding:10px 12px">
+          <div style="font-size:12px;font-weight:600;color:var(--sky600);margin-bottom:3px">전월 지급액</div>
+          <div style="font-size:15px;font-weight:800;color:var(--sky800);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${fmtWon(prevPay)}</div>
+          <div style="font-size:12px;color:var(--txt2);margin-top:2px">${py}년 ${pm}월</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r12);padding:10px 12px">
+          <div style="font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:3px">당월 지급액</div>
+          <div style="font-size:15px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${fmtWon(totalPay)}</div>
+          <div style="font-size:12px;color:var(--txt2);margin-top:2px">${curYear}년 ${curMonth}월</div>
+        </div>
+        <div style="background:${diffBg};border:1px solid ${diffBorder};border-radius:var(--r12);padding:10px 12px">
+          <div style="font-size:12px;font-weight:600;color:${diffColor};margin-bottom:3px">전월 대비</div>
+          <div style="font-size:15px;font-weight:800;color:${diffColor};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sign(diffPay)}${fmtWon(Math.abs(diffPay))}</div>
+          <div style="font-size:12px;font-weight:600;color:${diffColor};margin-top:2px">${diffPay===0?'변동 없음':isUp?'증가':'감소'}</div>
+        </div>
+      </div>`;
+  }
 }
 
 // ── 직원별 누적 바 차트 ───────────────────────────────
@@ -912,7 +936,7 @@ function renderTrend(){
     return s===e?s:`${s} ~ ${e}`;
   })();
   document.getElementById('trendTotalCard').innerHTML=`
-    <div style="margin:0 0 12px;background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:14px 16px">
+    <div style="margin:0 0 12px;background:var(--card);border-radius:var(--r12);border:1px solid var(--border);padding:14px 16px">
       <div style="font-size:12px;color:var(--txt2);margin-bottom:10px;font-weight:500">📊 전체 기간 합계 <span style="font-weight:400;color:var(--txt3)">${monthRange}</span></div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">
         <div style="background:var(--bg);border-radius:8px;padding:10px 6px">
